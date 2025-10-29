@@ -1,6 +1,12 @@
-import { Search, ShoppingBag, User, Heart, Menu } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, User, Heart, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
+import CartDrawer from "./CartDrawer";
+import { toast } from "sonner";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,20 +15,34 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Header = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/shop?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out successfully");
+    navigate("/");
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card shadow-soft">
-      {/* Top Banner */}
       <div className="bg-primary text-primary-foreground py-2 text-center text-sm">
         <p className="font-medium">Free Shipping on Orders Over ₹999 | 10% Off on First Order - Use Code: FIRST10</p>
       </div>
 
-      {/* Main Header */}
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild className="lg:hidden">
               <Button variant="ghost" size="icon">
@@ -31,38 +51,22 @@ const Header = () => {
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] bg-card">
               <nav className="flex flex-col gap-4 mt-8">
-                <Link to="/" className="text-lg font-medium hover:text-primary transition-smooth">
-                  Home
-                </Link>
-                <Link to="/shop" className="text-lg font-medium hover:text-primary transition-smooth">
-                  Shop
-                </Link>
-                <Link to="/collections" className="text-lg font-medium hover:text-primary transition-smooth">
-                  Collections
-                </Link>
-                <Link to="/new-arrivals" className="text-lg font-medium hover:text-primary transition-smooth">
-                  New Arrivals
-                </Link>
-                <Link to="/about" className="text-lg font-medium hover:text-primary transition-smooth">
-                  About Us
-                </Link>
-                <Link to="/contact" className="text-lg font-medium hover:text-primary transition-smooth">
-                  Contact
-                </Link>
+                <Link to="/" className="text-lg font-medium hover:text-primary transition-smooth">Home</Link>
+                <Link to="/shop" className="text-lg font-medium hover:text-primary transition-smooth">Shop</Link>
+                <Link to="/collections" className="text-lg font-medium hover:text-primary transition-smooth">Collections</Link>
+                <Link to="/new-arrivals" className="text-lg font-medium hover:text-primary transition-smooth">New Arrivals</Link>
+                <Link to="/about" className="text-lg font-medium hover:text-primary transition-smooth">About Us</Link>
+                <Link to="/contact" className="text-lg font-medium hover:text-primary transition-smooth">Contact</Link>
               </nav>
             </SheetContent>
           </Sheet>
 
-          {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <h1 className="text-2xl font-heading font-bold text-primary">Twinkle Shine</h1>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
-            <Link to="/" className="text-sm font-medium hover:text-primary transition-smooth">
-              Home
-            </Link>
+            <Link to="/" className="text-sm font-medium hover:text-primary transition-smooth">Home</Link>
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
@@ -72,25 +76,6 @@ const Header = () => {
                       <NavigationMenuLink asChild>
                         <Link to="/shop?category=earrings" className="block p-3 hover:bg-muted rounded-md transition-smooth">
                           <div className="font-medium">Earrings</div>
-                          <div className="text-sm text-muted-foreground">Studs, Hoops, Jhumkas & More</div>
-                        </Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link to="/shop?category=necklaces" className="block p-3 hover:bg-muted rounded-md transition-smooth">
-                          <div className="font-medium">Necklaces</div>
-                          <div className="text-sm text-muted-foreground">Pendants, Chains & Statement Pieces</div>
-                        </Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link to="/shop?category=bracelets" className="block p-3 hover:bg-muted rounded-md transition-smooth">
-                          <div className="font-medium">Bracelets & Bangles</div>
-                          <div className="text-sm text-muted-foreground">Elegant Wrist Wear</div>
-                        </Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link to="/shop?category=rings" className="block p-3 hover:bg-muted rounded-md transition-smooth">
-                          <div className="font-medium">Rings</div>
-                          <div className="text-sm text-muted-foreground">Delicate & Bold Designs</div>
                         </Link>
                       </NavigationMenuLink>
                     </div>
@@ -98,37 +83,42 @@ const Header = () => {
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-            <Link to="/collections" className="text-sm font-medium hover:text-primary transition-smooth">
-              Collections
-            </Link>
-            <Link to="/new-arrivals" className="text-sm font-medium hover:text-primary transition-smooth">
-              New Arrivals
-            </Link>
-            <Link to="/about" className="text-sm font-medium hover:text-primary transition-smooth">
-              About Us
-            </Link>
-            <Link to="/contact" className="text-sm font-medium hover:text-primary transition-smooth">
-              Contact
-            </Link>
+            <Link to="/collections" className="text-sm font-medium hover:text-primary transition-smooth">Collections</Link>
+            <Link to="/new-arrivals" className="text-sm font-medium hover:text-primary transition-smooth">New Arrivals</Link>
+            <Link to="/about" className="text-sm font-medium hover:text-primary transition-smooth">About Us</Link>
+            <Link to="/contact" className="text-sm font-medium hover:text-primary transition-smooth">Contact</Link>
           </nav>
 
-          {/* Actions */}
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
-              <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Heart className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingBag className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-medium">
-                0
-              </span>
-            </Button>
+            <form onSubmit={handleSearch} className="hidden lg:flex items-center">
+              <Input
+                type="search"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-40"
+              />
+            </form>
+            <Link to="/wishlist">
+              <Button variant="ghost" size="icon">
+                <Heart className="h-5 w-5" />
+              </Button>
+            </Link>
+            <CartDrawer />
+            {user ? (
+              <>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleSignOut}>
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </>
+            ) : (
+              <Link to="/auth">
+                <Button variant="default" size="sm">Sign In</Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
